@@ -1,0 +1,37 @@
+.tab.hard-pinned
+{
+    z-index: 1;
+    position: absolute !important;
+}
+
+.tab-close
+{
+    width: 20px !important;
+}
+
+.tab-hard-pin
+{
+    width: 10px;
+    height: 20px;
+    padding: 0 5px;
+    margin-top: auto;
+    margin-bottom: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tab-hard-pin-action
+{
+    flex: 1;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid white;    
+    height: 6px;
+    width: 6px;
+}
+
+.tab.hard-pinned .tab-hard-pin-action
+{
+    background: white;
+}
