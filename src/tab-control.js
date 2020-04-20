@@ -1,3 +1,5 @@
+const arrayMove = require('array-move');
+
 export class TabControl
 {
     constructor(tabsAndActionsContainer, styleElement, tabScroller, tabsContainer, tabScrollBar)
@@ -12,6 +14,8 @@ export class TabControl
         this.tabsAndActionsContainer.id = this.id;
 
         this.hardPinnedTabsTitles = [];
+        this.dragTitle = "";
+        this.dragTargetTitle = "";
 
         this.tabsContainerMutationObserver = new MutationObserver(this.mutationCallbackGenerator(TabControl.onTabsChanged, TabControl.onTabsOrderChanged));
         this.tabsContainerMutationObserver.observe(this.tabsContainer, { childList: true, attributes: true });
@@ -124,38 +128,40 @@ export class TabControl
                     }
                     TabControl.onTabsChanged(tabControl, null, true);
                 };
+
+                tab.addEventListener("dragstart", function (ev)
+                {
+                    tabControl.dragTitle = tab.title;
+                });
+
+
+                tab.addEventListener("dragenter", function (ev)
+                {
+                    tabControl.dragTargetTitle = ev.currentTarget.title;
+                });
+
+                tab.addEventListener("drop", function (ev)
+                {
+                    var dragIndex = tabControl.hardPinnedTabsTitles.indexOf(tabControl.dragTitle);
+                    var dragTargetIndex = tabControl.hardPinnedTabsTitles.indexOf(tabControl.dragTargetTitle);
+
+                    if (dragIndex > -1 && dragTargetIndex > -1)
+                    {
+                        arrayMove.mutate(tabControl.hardPinnedTabsTitles, dragIndex, dragTargetIndex);
+
+                        TabControl.onTabsChanged(tabControl, null);
+                    }
+                });
+
+
             }
         }
 
-
-
-        // Hard pinned tabs are displayed according to VS Code order and
-        // may thus seem to jump "unexpectedly", but can be reordered
-
         // Apply the margins and refill tabControl.hardPinnedTabsTitles
-        // since closed tab titles may still exist there. This loop
-        // just adds those that actually exist.
+        // since closed tab titles may still exist there. 
 
         let hardPinnedWidth = 0;
-        tabControl.hardPinnedTabsTitles = [];
-
-        for (let tab of allHardPinnedTabs)
-        {
-            tab.style.marginLeft = hardPinnedWidth + "px";
-            hardPinnedWidth += tab.offsetWidth;
-
-            tabControl.hardPinnedTabsTitles.push(tab.title);
-        }
-
-        tabControl.setHardPinnedWidth(hardPinnedWidth);
-
-
-
-        /*
-
-        // Hard pinned tabs are displayed in the order of pinning, but can not be reordered
-
-        let hardPinnedWidth = 0;
+        let hardPinnedTabsTitles = [];
         for (let title of tabControl.hardPinnedTabsTitles)
         {
             var tab = null;
@@ -165,6 +171,7 @@ export class TabControl
                 if (testTab.title == title)
                 {
                     tab = testTab;
+                    hardPinnedTabsTitles.push(title);
                     break;
                 }
             }
@@ -176,9 +183,12 @@ export class TabControl
             }
         }
 
-        tabControl.setHardPinnedWidth(hardPinnedWidth);
+        // Refresh the list so that only hard pinned tabs appear
+        // State may have changed if a not HardPin operation has been performed
+        // For example, closing a hard pinned tab will not remove it from tabControl.hardPinnedTabsTitles
+        tabControl.hardPinnedTabsTitles = hardPinnedTabsTitles;
 
-        */
+        tabControl.setHardPinnedWidth(hardPinnedWidth);
     }
 
     static onTabsOrderChanged(tabControl, mutation)
@@ -186,11 +196,7 @@ export class TabControl
         // Why static? The MutationObserver pointed "this" to something else than the class itself.
         // Static atleast fixes that problem. Other fixes may exist.
 
-        // The correct order can not easily be determined here, due to VS Code tab implementation.
-        // However, the problem can be completely fixed by having the hardpin button set the index
-        // of the tab to index = numberOfHardpinnedTabs. 
-
-        TabControl.onTabsChanged(tabControl, mutation);
+        // See TabControl.tabsChanged and the "drop" event
     }
 
     mutationCallbackGenerator(onChildListChange, onAttributesChanged)
