@@ -106,27 +106,7 @@ export class TabControl
                     // Have to work with titles rather than classes, because 
                     // VS Code tab arrangement implementation
 
-                    if (tabControl.hardPinnedTabsTitles.includes(tab.title))
-                    {
-                        // Unhard pin action
-                        var index = tabControl.hardPinnedTabsTitles.indexOf(tab.title);
-                        tabControl.hardPinnedTabsTitles.splice(index, 1);
-
-                        if (event.stopPropagation)
-                        {
-                            event.stopPropagation();
-                        }
-                        else if (window.event)
-                        {
-                            window.event.cancelBubble = true;
-                        }
-                    }
-                    else
-                    {
-                        // Hard pin action
-                        tabControl.hardPinnedTabsTitles.push(tab.title)
-                    }
-                    TabControl.onTabsChanged(tabControl, null, true);
+                    tabControl.toggleHardPinTitle(tab.title);
                 };
 
                 tab.addEventListener("dragstart", function (ev)
@@ -243,6 +223,31 @@ export class TabControl
         // Get the processed class. The id of this element is added to it, so that it is easy
         // to distinguish.
         return TabControl.processedClassPrefix + "-" + this.id;
+    }
+
+    toggleHardPinTitle(title)
+    {
+        if (this.hardPinnedTabsTitles.includes(title))
+        {
+            // Unhard pin action
+            var index = this.hardPinnedTabsTitles.indexOf(title);
+            this.hardPinnedTabsTitles.splice(index, 1);
+
+            if (event.stopPropagation)
+            {
+                event.stopPropagation();
+            }
+            else if (window.event)
+            {
+                window.event.cancelBubble = true;
+            }
+        }
+        else
+        {
+            // Hard pin action
+            this.hardPinnedTabsTitles.push(title)
+        }
+        TabControl.onTabsChanged(this, null, true);
     }
 }
 

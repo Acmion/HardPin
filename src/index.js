@@ -18,6 +18,7 @@ class HardPin
         HardPin.styleElement.innerHTML = hardPinCss;
 
         HardPin.setAllTabControls();
+        HardPin.listenForKeyboardShortcuts();
     }
 
     static setAllTabControls()
@@ -40,6 +41,54 @@ class HardPin
         {
             HardPin.setAllTabControls();
         }
+    }
+
+    static listenForKeyboardShortcuts()
+    {
+        document.addEventListener("keydown", function (event)
+        {
+            if (event.ctrlKey && event.altKey && event.key === "p")
+            {
+                var activeTab = HardPin.getActiveTab();
+                var activeTabControl = HardPin.getParentTabControl(activeTab);
+
+                activeTabControl.toggleHardPinTitle(activeTab.title);
+            }
+        });
+    }
+
+    static getActiveTab()
+    {
+        // Quite ugly
+        var candidateTabs = document.getElementsByClassName('tab active');
+        for (let tab of candidateTabs)
+        {
+            var icon = tab.getElementsByClassName('monaco-icon-label')[0];
+
+            // VS Code applies the color so that the active tab has
+            // style.color == rgb(255, 255, 255) and so that seemingly active
+            // tabs have style.color == rgba(255, 255, 255, 0.5). Colors may
+            // differ by theme.
+            if (icon.style.color.includes('rgb('))
+            {
+                return tab;
+            }
+        }
+
+        return null;
+    }
+
+    static getParentTabControl(tab)
+    {
+        for (let tabControl of HardPin.tabControls)
+        {
+            if (tabControl.tabsContainer.contains(tab))
+            {
+                return tabControl;
+            }
+        }
+
+        return null;
     }
 }
 

@@ -12,3 +12,7 @@ Run these commands in a terminal. Note: You must have npm installed.
 5. Help > Toggle Developer Tool > Console
 6. Paste the code in to the console and execute
 7. Enjoy
+
+## Keyboard Shortcut
+
+Toggle the pin status of the active tab by pressing Shift + Alt + P (on Mac: Cmd + Option + P).
