@@ -2,7 +2,7 @@ const arrayMove = require('array-move');
 
 export class TabControl
 {
-    constructor(tabsAndActionsContainer, styleElement, tabScroller, tabsContainer, tabScrollBar)
+    constructor(tabsAndActionsContainer, styleElement, tabScroller, tabsContainer, tabScrollBar, useDoubleRows)
     {
         this.tabsAndActionsContainer = tabsAndActionsContainer;
         this.styleElement = styleElement;
@@ -16,9 +16,13 @@ export class TabControl
         this.hardPinnedTabsTitles = [];
         this.dragTitle = "";
         this.dragTargetTitle = "";
+        this.useDoubleRows = useDoubleRows;
+
+        this.extractHardPinnedTitlesFromElement();
 
         this.tabsContainerMutationObserver = new MutationObserver(this.mutationCallbackGenerator(TabControl.onTabsChanged, TabControl.onTabsOrderChanged));
         this.tabsContainerMutationObserver.observe(this.tabsContainer, { childList: true, attributes: true });
+
 
         TabControl.tabControlCreationCount++;
     }
@@ -28,7 +32,7 @@ export class TabControl
         this.tabsContainerMutationObserver.disconnect();
     }
 
-    static getAllTabControls()
+    static getAllTabControls(useDoubleRows)
     {
         var tabControls = [];
         var tabsAndActionsContainers = document.getElementsByClassName(TabControl.tabsAndActionsContainerClass);
@@ -39,10 +43,20 @@ export class TabControl
             var tabsContainer = tabScroller.getElementsByClassName(TabControl.tabsContainerClass)[0];
             var tabScrollBar = tabScroller.getElementsByClassName(TabControl.tabScrollBarClass)[0];
 
-            var styleElement = document.createElement('style');
-            tabsAndActionsContainer.insertBefore(styleElement, tabsAndActionsContainer.childNodes[0]);
+            var styleElement = null;
+            var styleElements = tabsAndActionsContainer.getElementsByTagName('style');
 
-            var tabControl = new TabControl(tabsAndActionsContainer, styleElement, tabScroller, tabsContainer, tabScrollBar);
+            if (styleElements.length > 0)
+            {
+                styleElement = styleElements[0];
+            }
+            else
+            {
+                styleElement = document.createElement('style');
+                tabsAndActionsContainer.insertBefore(styleElement, tabsAndActionsContainer.childNodes[0]);
+            }
+
+            var tabControl = new TabControl(tabsAndActionsContainer, styleElement, tabScroller, tabsContainer, tabScrollBar, useDoubleRows);
 
             TabControl.onTabsChanged(tabControl);
 
@@ -168,7 +182,9 @@ export class TabControl
         // For example, closing a hard pinned tab will not remove it from tabControl.hardPinnedTabsTitles
         tabControl.hardPinnedTabsTitles = hardPinnedTabsTitles;
 
-        tabControl.setHardPinnedWidth(hardPinnedWidth);
+        tabControl.setStyle(hardPinnedWidth);
+
+        tabControl.saveHardPinnedTitlesInElement();
     }
 
     static onTabsOrderChanged(tabControl, mutation)
@@ -203,19 +219,60 @@ export class TabControl
         };
     }
 
-    setHardPinnedWidth(width)
+    setStyle(hardPinnedWidth)
     {
         // Set the css of the style element
         // Shifts all non hard pinned tabs by the width of hard pinned tabs
         // Uses the ::before element of TabControl.tabsContainerClass
-        this.styleElement.innerHTML = `
 
-            #${this.id} .${TabControl.tabsContainerClass}::before
+        if (!this.useDoubleRows)
+        {
+            this.styleElement.innerHTML = `
+
+                #${this.id} .${TabControl.tabsContainerClass}::before
+                {
+                    content: "";
+                    margin-left: ${hardPinnedWidth}px;
+                }
+            `;
+        }
+        else
+        {
+            // Default value
+            var tabContainerHeight = "35px";
+            var notHardPinnedTabMarginTop = "0px";
+
+            if (hardPinnedWidth > 0)
             {
-                content: "";
-                margin-left: ${width}px;
+                // We have hard pinned tabs
+
+                // 2x default
+                tabContainerHeight = "70px";
+                notHardPinnedTabMarginTop = "35px";
             }
-        `;
+
+            this.styleElement.innerHTML = `
+
+                #${this.id} .${TabControl.tabsContainerClass}::before
+                {
+                    content: "";
+                    margin-left: 0px;
+                }
+
+                #${this.id} .${TabControl.tabScrollerClass},
+                #${this.id} .${TabControl.tabsContainerClass}
+                {
+                    height: ${tabContainerHeight} !important;
+                }
+
+                #${this.id} .${TabControl.tabClass}:not(.${TabControl.hardPinnedClass})
+                {
+                    margin-top: ${notHardPinnedTabMarginTop} !important;
+                } 
+            `;
+        }
+
+
     }
 
     getProcessedClass()
@@ -249,6 +306,21 @@ export class TabControl
         }
         TabControl.onTabsChanged(this, null, true);
     }
+
+    saveHardPinnedTitlesInElement()
+    {
+        this.tabsAndActionsContainer.dataset.hardPinnedTabsTitles = JSON.stringify(this.hardPinnedTabsTitles);
+    }
+
+    extractHardPinnedTitlesFromElement()
+    {
+        if (this.tabsAndActionsContainer.dataset.hardPinnedTabsTitles != null)
+        {
+            this.hardPinnedTabsTitles = JSON.parse(this.tabsAndActionsContainer.dataset.hardPinnedTabsTitles);
+        }
+    }
+
+
 }
 
 // Vs Code

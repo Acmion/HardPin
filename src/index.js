@@ -1,5 +1,6 @@
 import { TabControl } from './tab-control';
 var hardPinCss = require('./main.css').toString();
+var hardPinDoubleRowCss = require('./double-row.css').toString();
 
 class HardPin
 {
@@ -31,7 +32,7 @@ class HardPin
             }
         }
 
-        HardPin.tabControls = TabControl.getAllTabControls();
+        HardPin.tabControls = TabControl.getAllTabControls(HardPin.doubleRow);
     }
 
     static editorContainerMutationObserved(mutationList, observer)
@@ -90,6 +91,29 @@ class HardPin
 
         return null;
     }
+
+    static useDoubleRow(bool)
+    {
+        if (HardPin.styleDoubleRowElement == null)
+        {
+            HardPin.styleDoubleRowElement = document.createElement('style');
+            document.head.appendChild(HardPin.styleDoubleRowElement);
+        }
+
+        if (bool)
+        {
+            HardPin.styleDoubleRowElement.innerHTML = hardPinDoubleRowCss;
+        }
+        else
+        {
+            HardPin.styleDoubleRowElement.innerHTML = "";
+        }
+
+        HardPin.doubleRow = bool;
+        HardPin.setAllTabControls();
+
+        window.dispatchEvent(new Event('resize'));
+    }
 }
 
 HardPin.editorContainerClass = 'monaco-grid-view';
@@ -97,5 +121,9 @@ HardPin.editorContainer = null;
 HardPin.editorContainerMutationObeserver = null;
 HardPin.tabControls = null;
 HardPin.styleElement = null;
+HardPin.styleDoubleRowElement = null;
+HardPin.doubleRow = false;
 
 HardPin.start();
+
+window.HardPin = HardPin;

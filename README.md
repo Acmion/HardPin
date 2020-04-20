@@ -13,6 +13,16 @@ Run these commands in a terminal. Note: You must have npm installed.
 6. Paste the code in to the console and execute
 7. Enjoy
 
+## Settings
+
+To use a separate row for pinned tabs run the following command in the console (after completing step 6):
+
+`HardPin.useDoubleRow(true)`
+
+To revert back to a single row run:
+
+`HardPin.useDoubleRow(false)`
+
 ## Keyboard Shortcut
 
 Toggle the pin status of the active tab by pressing Shift + Alt + P (on Mac: Cmd + Option + P).
