@@ -197,6 +197,8 @@ export class TabControl
         // Static atleast fixes that problem. Other fixes may exist.
 
         // See TabControl.tabsChanged and the "drop" event
+
+        TabControl.onTabsChanged(tabControl, mutation);
     }
 
     mutationCallbackGenerator(onChildListChange, onAttributesChanged)
