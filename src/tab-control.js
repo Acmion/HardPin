@@ -270,6 +270,9 @@ export class TabControl
                     margin-top: ${notHardPinnedTabMarginTop} !important;
                 } 
             `;
+
+            window.dispatchEvent(new Event('resize'));
+
         }
 
 
