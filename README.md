@@ -1,5 +1,5 @@
 # HardPin
-A makeshift solution to hard pin tabs in VS Code. See https://hard-pin.adamantica.com for more details.
+A makeshift solution to hard pin tabs in VS Code. See https://hard-pin.acmion.com for more details.
 
 ## Building and Running HardPin
 
