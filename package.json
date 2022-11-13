@@ -13,7 +13,7 @@
     "css-loader": "^3.5.2",
     "to-string-loader": "^1.1.6",
     "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
     "array-move": "^2.2.1"
